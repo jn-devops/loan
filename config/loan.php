@@ -1,6 +1,6 @@
 <?php
 
-// config for Homeful/Loan
+// config for Homeful/Loan2
 return [
 
 ];

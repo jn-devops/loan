@@ -1,6 +1,6 @@
 {
     "name": "jn-devops/loan",
-    "description": "Homefule Loan Package",
+    "description": "Homeful Loan Package",
     "keywords": [
         "Homeful",
         "laravel",
@@ -17,8 +17,12 @@
     ],
     "require": {
         "php": "^8.2",
+        "illuminate/contracts": "^10.0||^11.0",
+        "jarouche/financial": "V2.1",
+        "jn-devops/borrower": "^1.0",
+        "spatie/laravel-data": "^4.6",
         "spatie/laravel-package-tools": "^1.16",
-        "illuminate/contracts": "^10.0||^11.0"
+        "whitecube/php-prices": "v3.0.0"
     },
     "require-dev": {
         "laravel/pint": "^1.14",
@@ -80,6 +84,6 @@
             }
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
