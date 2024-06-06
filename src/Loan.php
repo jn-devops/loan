@@ -2,12 +2,12 @@
 
 namespace Homeful\Loan;
 
+use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Jarouche\Financial\PMT;
 use Whitecube\Price\Price;
-use Brick\Money\Money;
 
 class Loan
 {
@@ -22,7 +22,6 @@ class Loan
     protected Price $loan_amount;
 
     /**
-     * @param Borrower $borrower
      * @return $this
      */
     public function setBorrower(Borrower $borrower): self
@@ -32,16 +31,12 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Borrower
-     */
     public function getBorrower(): Borrower
     {
         return $this->borrower;
     }
 
     /**
-     * @param Property $property
      * @return $this
      */
     public function setProperty(Property $property): self
@@ -51,16 +46,12 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Property
-     */
     public function getProperty(): Property
     {
         return $this->property;
     }
 
     /**
-     * @param Price $value
      * @return $this
      */
     public function setLoanAmount(Price $value): self
@@ -70,17 +61,11 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Price
-     */
     public function getLoanAmount(): Price
     {
         return $this->loan_amount;
     }
 
-    /**
-     * @return int
-     */
     public function getMaximumMonthsToPay(): int
     {
         $date_at_maximum_loan_maturity = $this->borrower->getOldestAmongst()->getBirthdate()->copy()
@@ -92,38 +77,35 @@ class Loan
     /**
      * Manually encoded matrix
      *
-     * @return float
      * @throws \Brick\Math\Exception\MathException
      * @throws \Brick\Money\Exception\MoneyMismatchException
      */
     public function getAnnualInterestRate(): float
     {
-        return match(true) {
+        return match (true) {
             $this->getProperty()->getTotalContractPrice()->inclusive()->compareTo(750000) <= 0 => ($this->getBorrower()->getRegional()
-                ? ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(12000) <= 0 ? 3/100 : 6.25/100)
-                : ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(14500) <= 0 ? 3/100 : 6.25/100)),
+                ? ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(12000) <= 0 ? 3 / 100 : 6.25 / 100)
+                : ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(14500) <= 0 ? 3 / 100 : 6.25 / 100)),
             $this->getProperty()->getTotalContractPrice()->inclusive()->compareTo(800000) <= 0 => ($this->getBorrower()->getRegional()
-                ? ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(13000) <= 0 ? 3/100 : 6.25/100)
-                : ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(15500) <= 0 ? 3/100 : 6.25/100)),
+                ? ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(13000) <= 0 ? 3 / 100 : 6.25 / 100)
+                : ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(15500) <= 0 ? 3 / 100 : 6.25 / 100)),
             $this->getProperty()->getTotalContractPrice()->inclusive()->compareTo(850000) <= 0 => ($this->getBorrower()->getRegional()
-                ? ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(15000) <= 0 ? 3/100 : 6.25/100)
-                : ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(16500) <= 0 ? 3/100 : 6.25/100)),
-            default => 6.25/100,
+                ? ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(15000) <= 0 ? 3 / 100 : 6.25 / 100)
+                : ($this->getBorrower()->getGrossMonthlyIncome()->inclusive()->compareTo(16500) <= 0 ? 3 / 100 : 6.25 / 100)),
+            default => 6.25 / 100,
         };
     }
 
     /**
-     * @return float
      * @throws \Brick\Math\Exception\MathException
      * @throws \Brick\Money\Exception\MoneyMismatchException
      */
     public function getMonthlyInterestRate(): float
     {
-        return $this->getAnnualInterestRate()/12;
+        return $this->getAnnualInterestRate() / 12;
     }
 
     /**
-     * @return Price
      * @throws \Brick\Math\Exception\MathException
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
