@@ -2,9 +2,9 @@
 
 namespace Homeful\Loan;
 
-use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Spatie\LaravelPackageTools\Package;
 use Homeful\Loan\Commands\LoanCommand;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class LoanServiceProvider extends PackageServiceProvider
 {

@@ -2,13 +2,13 @@
 
 namespace Homeful\Loan;
 
-use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
+use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
+use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Jarouche\Financial\PMT;
 use Whitecube\Price\Price;
-use Brick\Money\Money;
 
 class Loan
 {
@@ -56,12 +56,14 @@ class Loan
 
     /**
      * @return $this
+     *
      * @throws LoanExceedsLoanableValueException
      */
     public function setLoanAmount(Price $value): self
     {
-        if ($value->compareTo($this->getProperty()->getLoanableValue()) > 0)
+        if ($value->compareTo($this->getProperty()->getLoanableValue()) > 0) {
             throw new LoanExceedsLoanableValueException;
+        }
 
         $this->loan_amount = $value;
 
@@ -74,8 +76,8 @@ class Loan
     }
 
     /**
-     * @param Price|float $value
      * @return $this
+     *
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
      * @throws \Brick\Money\Exception\UnknownCurrencyException
@@ -90,7 +92,6 @@ class Loan
     }
 
     /**
-     * @return Price
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
      * @throws \Brick\Money\Exception\UnknownCurrencyException
@@ -100,9 +101,6 @@ class Loan
         return $this->equity ?? new Price(Money::of(0, 'PHP'));
     }
 
-    /**
-     * @return int
-     */
     public function getMaximumMonthsToPay(): int
     {
         $date_at_maximum_loan_maturity = $this->borrower->getOldestAmongst()->getBirthdate()->copy()
@@ -159,7 +157,6 @@ class Loan
     }
 
     /**
-     * @return Price
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
      * @throws \Brick\Money\Exception\UnknownCurrencyException
@@ -168,8 +165,7 @@ class Loan
     {
         $equity = $this->property->getTotalContractPrice()->inclusive()
             ->minus($this->getLoanAmount()->inclusive())
-            ->minus($this->getEquity()->inclusive())
-        ;
+            ->minus($this->getEquity()->inclusive());
 
         return new Price($equity);
     }

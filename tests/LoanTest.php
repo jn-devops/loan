@@ -1,13 +1,13 @@
 <?php
 
-use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
-use Homeful\Loan\Data\LoanData;
-use Homeful\Property\Property;
+use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
+use Homeful\Loan\Data\LoanData;
+use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
+use Homeful\Loan\Loan;
+use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Whitecube\Price\Price;
-use Homeful\Loan\Loan;
-use Brick\Money\Money;
 
 dataset('borrower', function () {
     return [
@@ -146,8 +146,8 @@ it('has default monthly amortization payment depending on loan amount', function
     expect($loanable_value)->toBe(807500.95);
     expect($loan->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(4972.0);
     expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 10000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(4910.0);
-    expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 20000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe( 4849.0);
-    expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 30000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe( 4787.0);
+    expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 20000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(4849.0);
+    expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 30000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(4787.0);
 })->with('borrower', 'property');
 
 it('has loan data', function (Borrower $borrower, Property $property) {
@@ -188,7 +188,7 @@ it('has loan amount that should be less than the loanable amount', function (Bor
 
 })->with('borrower')->expectException(LoanExceedsLoanableValueException::class);
 
-it('may have equity', function() {
+it('may have equity', function () {
     $borrower = (new Borrower)
         ->setRegional(false)
         ->setBirthdate(Carbon::now()->addYears(-40))
