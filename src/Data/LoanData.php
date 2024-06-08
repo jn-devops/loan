@@ -3,9 +3,9 @@
 namespace Homeful\Loan\Data;
 
 use Homeful\Borrower\Data\BorrowerData;
+use Homeful\Loan\Loan;
 use Homeful\Property\Data\PropertyData;
 use Spatie\LaravelData\Data;
-use Homeful\Loan\Loan;
 
 class LoanData extends Data
 {
@@ -18,7 +18,8 @@ class LoanData extends Data
         public float $equity_requirement_amount,
         public BorrowerData $borrower,
         public PropertyData $property,
-    ) {}
+    ) {
+    }
 
     public static function fromObject(Loan $loan): self
     {
