@@ -6,18 +6,18 @@ use Homeful\Property\Property;
 use Homeful\Borrower\Borrower;
 use Illuminate\Support\Carbon;
 use Whitecube\Price\Price;
-use Brick\Money\Money;
 use Homeful\Loan\Loan;
+use Brick\Money\Money;
 
-dataset('borrower', function() {
+dataset('borrower', function () {
     return [
-        fn () => (new Borrower)->setRegional(false)->addWages(14500)->setBirthdate(Carbon::parse('1999-03-17'))
+        fn () => (new Borrower)->setRegional(false)->addWages(14500)->setBirthdate(Carbon::parse('1999-03-17')),
     ];
 });
 
-dataset('property', function() {
+dataset('property', function () {
     return [
-        fn () => (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP')))
+        fn () => (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP'))),
     ];
 });
 
@@ -37,105 +37,105 @@ it('has default interest rate', function () {
     $borrower = (new Borrower)->setRegional(false)->addWages(14500);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(750000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(3/100);
+    expect($loan->getAnnualInterestRate())->toBe(3 / 100);
 
     /** NCR, TCP <= 750k, GMI > 14,500 */
     $borrower = (new Borrower)->setRegional(false)->addWages(14501);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(750000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     /** NCR, 750k < TCP <= 800k GMI <= 15,500 */
     $borrower = (new Borrower)->setRegional(false)->addWages(15500);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(800000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(3/100);
+    expect($loan->getAnnualInterestRate())->toBe(3 / 100);
 
     /** NCR, 750k < TCP <= 800k GMI > 14,500 */
     $borrower = (new Borrower)->setRegional(false)->addWages(15501);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(800000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     /** NCR, 800k < TCP <= 850k GMI <= 16,500 */
     $borrower = (new Borrower)->setRegional(false)->addWages(16500);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(3/100);
+    expect($loan->getAnnualInterestRate())->toBe(3 / 100);
 
     /** NCR, 800k < TCP <= 850k GMI > 16,500 */
     $borrower = (new Borrower)->setRegional(false)->addWages(16501);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     /** NCR, 850k < TCP */
     $borrower = (new Borrower)->setRegional(false)->addWages(14500);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     $borrower = (new Borrower)->setRegional(false)->addWages(15500);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     $borrower = (new Borrower)->setRegional(false)->addWages(16500);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     /** Regional, TCP <= 750k, GMI <= 12,000 */
     $borrower = (new Borrower)->setRegional(true)->addWages(12000);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(750000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(3/100);
+    expect($loan->getAnnualInterestRate())->toBe(3 / 100);
 
     /** Regional, TCP <= 750k, GMI > 12,000 */
     $borrower = (new Borrower)->setRegional(true)->addWages(12001);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(750000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     /** Regional, 750k < TCP <= 800k GMI <= 13,000 */
     $borrower = (new Borrower)->setRegional(true)->addWages(13000);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(800000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(3/100);
+    expect($loan->getAnnualInterestRate())->toBe(3 / 100);
 
     /** Regional, 750k < TCP <= 800k GMI > 13,000 */
     $borrower = (new Borrower)->setRegional(true)->addWages(13001);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(800000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     /** Regional, 800k < TCP <= 850k GMI <= 15,000 */
     $borrower = (new Borrower)->setRegional(true)->addWages(15000);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(3/100);
+    expect($loan->getAnnualInterestRate())->toBe(3 / 100);
 
     /** Regional, 800k < TCP <= 850k GMI > 15,000 */
     $borrower = (new Borrower)->setRegional(true)->addWages(15001);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850000, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     /** Regional, 850k < TCP */
     $borrower = (new Borrower)->setRegional(true)->addWages(12000);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     $borrower = (new Borrower)->setRegional(true)->addWages(13000);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 
     $borrower = (new Borrower)->setRegional(true)->addWages(15000);
     $property = (new Property)->setTotalContractPrice(new Price(Money::of(850001, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->getAnnualInterestRate())->toBe(6.25/100);
+    expect($loan->getAnnualInterestRate())->toBe(6.25 / 100);
 });
 
 it('has default monthly amortization payment depending on loan amount', function (Borrower $borrower, Property $property) {
