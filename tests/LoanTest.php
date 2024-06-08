@@ -1,5 +1,6 @@
 <?php
 
+use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
 use Homeful\Loan\Data\LoanData;
 use Homeful\Property\Property;
 use Homeful\Borrower\Borrower;
@@ -139,21 +140,28 @@ it('has default interest rate', function () {
 
 it('has default monthly amortization payment depending on loan amount', function (Borrower $borrower, Property $property) {
     $loan = new Loan;
+    $property->setAppraisedValue(new Price(Money::of(850001, 'PHP')));
     $loan->setBorrower($borrower)->setProperty($property);
-    expect($loan->setLoanAmount(new Price(Money::of(850001, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(5234.0);
-    expect($loan->setLoanAmount(new Price(Money::of(850000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(5234.0);
-    expect($loan->setLoanAmount(new Price(Money::of(849000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe( 5227.0);
-    expect($loan->setLoanAmount(new Price(Money::of(840000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe( 5172.0);
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(807500.95);
+    expect($loan->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(4972.0);
+    expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 10000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(4910.0);
+    expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 20000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe( 4849.0);
+    expect($loan->setLoanAmount(new Price(Money::of($loanable_value - 30000, 'PHP')))->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe( 4787.0);
 })->with('borrower', 'property');
 
 it('has loan data', function (Borrower $borrower, Property $property) {
     $loan = new Loan;
     $property->setAppraisedValue(new Price(Money::of(850000, 'PHP')));
-    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of(850001, 'PHP')));
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(807500.0);
+    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
     $data = LoanData::fromObject($loan);
     expect($data->loan_amount)->toBe($loan->getLoanAmount()->inclusive()->getAmount()->toFloat());
     expect($data->months_to_pay)->toBe($loan->getMaximumMonthsToPay());
     expect($data->annual_interest)->toBe($loan->getAnnualInterestRate());
+    expect($data->equity)->toBe($loan->getEquity()->inclusive()->getAmount()->toFloat());
+    expect($data->equity_requirement_amount)->toBe($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat());
     expect($data->monthly_amortization)->toBe($loan->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat());
     expect($data->borrower->gross_monthly_income)->toBe($loan->getBorrower()->getGrossMonthlyIncome()->inclusive()->getAmount()->toFloat());
     expect($data->borrower->regional)->toBe($loan->getBorrower()->getRegional());
@@ -168,4 +176,32 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     expect($data->property->default_disposable_income_requirement_multiplier)->toBe($property->getDefaultDisposableIncomeRequirementMultiplier());
 })->with('borrower', 'property');
 
+it('has loan amount that should be less than the loanable amount', function (Borrower $borrower) {
+    $property = (new Property)
+        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
+        ->setAppraisedValue(new Price(Money::of(800000, 'PHP')));
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(800000.0);
+    $loan = new Loan;
+    $loan->setBorrower($borrower)->setProperty($property);
+    $loan->setLoanAmount(new Price(Money::of($loanable_value + 1, 'PHP')));
 
+})->with('borrower')->expectException(LoanExceedsLoanableValueException::class);
+
+it('may have equity', function() {
+    $borrower = (new Borrower)
+        ->setRegional(false)
+        ->setBirthdate(Carbon::now()->addYears(-40))
+        ->addWages(9000);
+    $property = (new Property)
+        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
+        ->setAppraisedValue(new Price(Money::of(800000, 'PHP')));
+    expect($property->getLoanableValueMultiplier())->toBe(1.0);
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(800000.0);
+    $loan = new Loan;
+    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
+    expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(50000.0);
+    $loan->setEquity(new Price(Money::of(50000.0, 'PHP')));
+    expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(0.0);
+});

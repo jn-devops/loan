@@ -3,6 +3,7 @@
 namespace Homeful\Loan;
 
 use Homeful\Borrower\Borrower;
+use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Jarouche\Financial\PMT;
@@ -20,6 +21,8 @@ class Loan
     protected Property $property;
 
     protected Price $loan_amount;
+
+    protected Price $equity;
 
     /**
      * @param Borrower $borrower
@@ -62,9 +65,13 @@ class Loan
     /**
      * @param Price $value
      * @return $this
+     * @throws LoanExceedsLoanableValueException
      */
     public function setLoanAmount(Price $value): self
     {
+        if ($value->compareTo($this->getProperty()->getLoanableValue()) > 0)
+            throw new LoanExceedsLoanableValueException;
+
         $this->loan_amount = $value;
 
         return $this;
@@ -76,6 +83,33 @@ class Loan
     public function getLoanAmount(): Price
     {
         return $this->loan_amount;
+    }
+
+    /**
+     * @param Price|float $value
+     * @return $this
+     * @throws \Brick\Math\Exception\NumberFormatException
+     * @throws \Brick\Math\Exception\RoundingNecessaryException
+     * @throws \Brick\Money\Exception\UnknownCurrencyException
+     */
+    public function setEquity(Price|float $value): self
+    {
+        $this->equity = $value instanceof Price
+            ? $value
+            : new Price(Money::of($value, 'PHP'));
+
+        return $this;
+    }
+
+    /**
+     * @return Price
+     * @throws \Brick\Math\Exception\NumberFormatException
+     * @throws \Brick\Math\Exception\RoundingNecessaryException
+     * @throws \Brick\Money\Exception\UnknownCurrencyException
+     */
+    public function getEquity(): Price
+    {
+        return $this->equity ?? new Price(Money::of(0, 'PHP'));
     }
 
     /**
@@ -137,5 +171,21 @@ class Loan
         $float = round($obj->evaluate());
 
         return new Price(Money::of((int) $float, 'PHP'));
+    }
+
+    /**
+     * @return Price
+     * @throws \Brick\Math\Exception\NumberFormatException
+     * @throws \Brick\Math\Exception\RoundingNecessaryException
+     * @throws \Brick\Money\Exception\UnknownCurrencyException
+     */
+    public function getEquityRequirementAmount(): Price
+    {
+        $equity = $this->property->getTotalContractPrice()->inclusive()
+            ->minus($this->getLoanAmount()->inclusive())
+            ->minus($this->getEquity()->inclusive())
+        ;
+
+        return new Price($equity);
     }
 }
