@@ -16,6 +16,7 @@ class LoanData extends Data
         public float $monthly_amortization,
         public float $equity,
         public float $equity_requirement_amount,
+        public bool $is_income_sufficient,
         public BorrowerData $borrower,
         public PropertyData $property,
     ) {
@@ -30,6 +31,7 @@ class LoanData extends Data
             monthly_amortization: $loan->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat(),
             equity: $loan->getEquity()->inclusive()->getAmount()->toFloat(),
             equity_requirement_amount: $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat(),
+            is_income_sufficient: $loan->getIsIncomeSufficient(),
             borrower: BorrowerData::fromObject($loan->getBorrower()),
             property: PropertyData::fromObject($loan->getProperty())
         );

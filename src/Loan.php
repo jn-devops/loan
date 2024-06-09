@@ -169,4 +169,18 @@ class Loan
 
         return new Price($equity);
     }
+
+    /**
+     * @return bool
+     * @throws \Brick\Math\Exception\MathException
+     * @throws \Brick\Math\Exception\NumberFormatException
+     * @throws \Brick\Math\Exception\RoundingNecessaryException
+     * @throws \Brick\Money\Exception\MoneyMismatchException
+     * @throws \Brick\Money\Exception\UnknownCurrencyException
+     */
+    public function getIsIncomeSufficient(): bool
+    {
+        return $this->getBorrower()->getJointDisposableMonthlyIncome($this->property)->inclusive()
+            ->compareTo($this->getMonthlyAmortizationAmount()->inclusive()) >= 0;
+    }
 }

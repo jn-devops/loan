@@ -162,11 +162,12 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     expect($data->annual_interest)->toBe($loan->getAnnualInterestRate());
     expect($data->equity)->toBe($loan->getEquity()->inclusive()->getAmount()->toFloat());
     expect($data->equity_requirement_amount)->toBe($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat());
+    expect($data->is_income_sufficient)->toBe($loan->getIsIncomeSufficient());
     expect($data->monthly_amortization)->toBe($loan->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat());
     expect($data->borrower->gross_monthly_income)->toBe($loan->getBorrower()->getGrossMonthlyIncome()->inclusive()->getAmount()->toFloat());
     expect($data->borrower->regional)->toBe($loan->getBorrower()->getRegional());
     expect($data->borrower->birthdate)->toBe($loan->getBorrower()->getBirthdate()->format('Y-m-d'));
-    expect($data->property->market_segment)->toBe($loan->getProperty()->getMarketSegment()->value);
+    expect($data->property->market_segment)->toBe($loan->getProperty()->getMarketSegment()->getName());
     expect($data->property->total_contract_price)->toBe($property->getTotalContractPrice()->inclusive()->getAmount()->toFloat());
     expect($data->property->appraised_value)->toBe($property->getAppraisedValue()->inclusive()->getAmount()->toFloat());
     expect($data->property->default_loanable_value_multiplier)->toBe($property->getDefaultLoanableValueMultiplier());
@@ -204,4 +205,32 @@ it('may have equity', function () {
     expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(50000.0);
     $loan->setEquity(new Price(Money::of(50000.0, 'PHP')));
     expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(0.0);
+});
+
+it('can have income insufficiency', function () {
+    $borrower = (new Borrower)
+        ->setRegional(false)
+        ->setBirthdate(Carbon::now()->addYears(-40))
+        ->addWages(70000);
+    $property = (new Property)
+        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
+        ->setAppraisedValue(new Price(Money::of(800000, 'PHP')));
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(800000.0);
+    $loan = new Loan;
+    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
+    expect($borrower->getJointDisposableMonthlyIncome($property)->inclusive()->getAmount()->toFloat())->toBe(24500.0);
+    expect($loan->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(4926.0);
+
+    $borrower = (new Borrower)
+        ->setRegional(false)
+        ->setBirthdate(Carbon::now()->addYears(-40))
+        ->addWages(9000);
+    $loan = new Loan;
+    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(800000.0);
+    expect($borrower->getJointDisposableMonthlyIncome($property)->inclusive()->getAmount()->toFloat())->toBe(3150.0);
+    expect($loan->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(3373.0);
+    expect($loan->getIsIncomeSufficient())->toBe(false);
 });
