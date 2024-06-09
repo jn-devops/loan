@@ -160,6 +160,7 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     expect($data->loan_amount)->toBe($loan->getLoanAmount()->inclusive()->getAmount()->toFloat());
     expect($data->months_to_pay)->toBe($loan->getMaximumMonthsToPay());
     expect($data->annual_interest)->toBe($loan->getAnnualInterestRate());
+    expect($data->joint_disposable_monthly_income)->toBe($loan->getJointDisposableMonthlyIncome()->inclusive()->getAmount()->toFloat());
     expect($data->equity)->toBe($loan->getEquity()->inclusive()->getAmount()->toFloat());
     expect($data->equity_requirement_amount)->toBe($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat());
     expect($data->is_income_sufficient)->toBe($loan->getIsIncomeSufficient());

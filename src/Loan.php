@@ -171,6 +171,14 @@ class Loan
     }
 
     /**
+     * @return Price
+     */
+    public function getJointDisposableMonthlyIncome(): Price
+    {
+        return $this->getBorrower()->getJointDisposableMonthlyIncome($this->getProperty());
+    }
+
+    /**
      * @throws \Brick\Math\Exception\MathException
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
@@ -179,7 +187,7 @@ class Loan
      */
     public function getIsIncomeSufficient(): bool
     {
-        return $this->getBorrower()->getJointDisposableMonthlyIncome($this->property)->inclusive()
+        return $this->getJointDisposableMonthlyIncome()->inclusive()
             ->compareTo($this->getMonthlyAmortizationAmount()->inclusive()) >= 0;
     }
 }
