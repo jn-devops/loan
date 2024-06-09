@@ -170,9 +170,6 @@ class Loan
         return new Price($equity);
     }
 
-    /**
-     * @return Price
-     */
     public function getJointDisposableMonthlyIncome(): Price
     {
         return $this->getBorrower()->getJointDisposableMonthlyIncome($this->getProperty());
