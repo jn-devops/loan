@@ -171,7 +171,6 @@ class Loan
     }
 
     /**
-     * @return bool
      * @throws \Brick\Math\Exception\MathException
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
