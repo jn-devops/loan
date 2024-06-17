@@ -2,10 +2,15 @@
 
 namespace Homeful\Loan\Data;
 
+use Brick\Math\Exception\RoundingNecessaryException;
+use Brick\Money\Exception\UnknownCurrencyException;
+use Brick\Money\Exception\MoneyMismatchException;
+use Brick\Math\Exception\NumberFormatException;
+use Brick\Math\Exception\MathException;
 use Homeful\Borrower\Data\BorrowerData;
-use Homeful\Loan\Loan;
 use Homeful\Property\Data\PropertyData;
 use Spatie\LaravelData\Data;
+use Homeful\Loan\Loan;
 
 class LoanData extends Data
 {
@@ -18,11 +23,22 @@ class LoanData extends Data
         public float $equity,
         public float $equity_requirement_amount,
         public bool $is_income_sufficient,
+        public int $equity_months_to_pay,
+        public float $equity_monthly_amortization,
         public BorrowerData $borrower,
         public PropertyData $property,
     ) {
     }
 
+    /**
+     * @param Loan $loan
+     * @return self
+     * @throws MathException
+     * @throws MoneyMismatchException
+     * @throws NumberFormatException
+     * @throws RoundingNecessaryException
+     * @throws UnknownCurrencyException
+     */
     public static function fromObject(Loan $loan): self
     {
         return new self(
@@ -34,6 +50,8 @@ class LoanData extends Data
             equity: $loan->getEquity()->inclusive()->getAmount()->toFloat(),
             equity_requirement_amount: $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat(),
             is_income_sufficient: $loan->getIsIncomeSufficient(),
+            equity_months_to_pay: $loan->getEquityMonthsToPay(),
+            equity_monthly_amortization: $loan->getEquityMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat(),
             borrower: BorrowerData::fromObject($loan->getBorrower()),
             property: PropertyData::fromObject($loan->getProperty())
         );
