@@ -1,14 +1,15 @@
 <?php
 
-use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
-use Brick\Math\{BigDecimal, RoundingMode};
-use Homeful\Loan\Data\LoanData;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
+use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
+use Homeful\Loan\Data\LoanData;
+use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
+use Homeful\Loan\Loan;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Whitecube\Price\Price;
-use Homeful\Loan\Loan;
-use Brick\Money\Money;
 
 dataset('borrower', function () {
     return [
