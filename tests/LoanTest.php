@@ -1,13 +1,14 @@
 <?php
 
-use Brick\Money\Money;
-use Homeful\Borrower\Borrower;
-use Homeful\Loan\Data\LoanData;
 use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
-use Homeful\Loan\Loan;
+use Brick\Math\{BigDecimal, RoundingMode};
+use Homeful\Loan\Data\LoanData;
+use Homeful\Borrower\Borrower;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Whitecube\Price\Price;
+use Homeful\Loan\Loan;
+use Brick\Money\Money;
 
 dataset('borrower', function () {
     return [
@@ -234,4 +235,10 @@ it('can have income insufficiency', function () {
     expect($borrower->getJointDisposableMonthlyIncome($property)->inclusive()->getAmount()->toFloat())->toBe(3150.0);
     expect($loan->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat())->toBe(3373.0);
     expect($loan->getIsIncomeSufficient())->toBe(false);
+
+    expect($loan->getEquityRequirementAmount()->inclusive()->compareTo(50000.0))->toBe(0);
+    expect($loan->getEquityMonthsToPay())->toBe(12);
+    expect($loan->getEquityMonthlyAmortizationAmount()->inclusive()->compareTo(BigDecimal::of(50000.0)->dividedBy(12, 2, RoundingMode::CEILING)))->toBe(0);
+    $loan->setEquityMonthsToPay(24);
+    expect($loan->getEquityMonthlyAmortizationAmount()->inclusive()->compareTo(BigDecimal::of(50000.0)->dividedBy(24, 2, RoundingMode::CEILING)))->toBe(0);
 });

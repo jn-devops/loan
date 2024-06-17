@@ -2,13 +2,14 @@
 
 namespace Homeful\Loan;
 
-use Brick\Money\Money;
-use Homeful\Borrower\Borrower;
 use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
+use Homeful\Borrower\Borrower;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
+use Brick\Math\RoundingMode;
 use Jarouche\Financial\PMT;
 use Whitecube\Price\Price;
+use Brick\Money\Money;
 
 class Loan
 {
@@ -25,6 +26,11 @@ class Loan
     protected Price $equity;
 
     /**
+     * @var int
+     */
+    protected int $equity_months_to_pay = 12;
+
+    /**
      * @return $this
      */
     public function setBorrower(Borrower $borrower): self
@@ -34,6 +40,9 @@ class Loan
         return $this;
     }
 
+    /**
+     * @return Borrower
+     */
     public function getBorrower(): Borrower
     {
         return $this->borrower;
@@ -49,6 +58,9 @@ class Loan
         return $this;
     }
 
+    /**
+     * @return Property
+     */
     public function getProperty(): Property
     {
         return $this->property;
@@ -70,6 +82,9 @@ class Loan
         return $this;
     }
 
+    /**
+     * @return Price
+     */
     public function getLoanAmount(): Price
     {
         return $this->loan_amount;
@@ -101,6 +116,9 @@ class Loan
         return $this->equity ?? new Price(Money::of(0, 'PHP'));
     }
 
+    /**
+     * @return int
+     */
     public function getMaximumMonthsToPay(): int
     {
         $date_at_maximum_loan_maturity = $this->borrower->getOldestAmongst()->getBirthdate()->copy()
@@ -170,6 +188,9 @@ class Loan
         return new Price($equity);
     }
 
+    /**
+     * @return Price
+     */
     public function getJointDisposableMonthlyIncome(): Price
     {
         return $this->getBorrower()->getJointDisposableMonthlyIncome($this->getProperty());
@@ -186,5 +207,36 @@ class Loan
     {
         return $this->getJointDisposableMonthlyIncome()->inclusive()
             ->compareTo($this->getMonthlyAmortizationAmount()->inclusive()) >= 0;
+    }
+
+
+    /**
+     * @param int $value
+     * @return $this
+     */
+    public function setEquityMonthsToPay(int $value): self
+    {
+        $this->equity_months_to_pay = $value;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEquityMonthsToPay(): int
+    {
+        return $this->equity_months_to_pay;
+    }
+
+    /**
+     * @return Price
+     * @throws \Brick\Math\Exception\NumberFormatException
+     * @throws \Brick\Math\Exception\RoundingNecessaryException
+     * @throws \Brick\Money\Exception\UnknownCurrencyException
+     */
+    public function getEquityMonthlyAmortizationAmount(): Price
+    {
+        return $this->getEquityRequirementAmount()->dividedBy($this->getEquityMonthsToPay(), RoundingMode::CEILING);
     }
 }
