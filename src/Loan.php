@@ -84,7 +84,7 @@ class Loan
      */
     public function getLoanAmount(): Price
     {
-        return $this->loan_amount;
+        return $this->loan_amount ?? new Price(Money::of(0, 'PHP'));
     }
 
     /**

@@ -1,15 +1,15 @@
 <?php
 
-use Brick\Math\BigDecimal;
-use Brick\Math\RoundingMode;
-use Brick\Money\Money;
-use Homeful\Borrower\Borrower;
-use Homeful\Loan\Data\LoanData;
 use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
-use Homeful\Loan\Loan;
+use Homeful\Loan\Data\LoanData;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
+use Homeful\Borrower\Borrower;
+use Brick\Math\RoundingMode;
 use Whitecube\Price\Price;
+use Brick\Math\BigDecimal;
+use Homeful\Loan\Loan;
+use Brick\Money\Money;
 
 dataset('borrower', function () {
     return [
@@ -192,7 +192,38 @@ it('has loan amount that should be less than the loanable amount', function (Bor
 
 })->with('borrower')->expectException(LoanExceedsLoanableValueException::class);
 
-it('may have equity', function () {
+it('has a default equity monthly amortization', function () {
+    $loan = new Loan;
+
+    /** NCR, TCP <= 750k, GMI <= 14,500 */
+    $borrower = (new Borrower)->setRegional(false)->addWages(14500);
+    $property = (new Property)->setTotalContractPrice(new Price(Money::of(750000, 'PHP')))->setAppraisedValue(new Price(Money::of(750000, 'PHP')));
+    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of(750000, 'PHP')));
+
+    expect($loan->getEquity()->inclusive()->compareTo(0))->toBe(0);
+    expect($loan->getEquityMonthlyAmortizationAmount()->inclusive()->compareTo(0))->toBe(0);
+    expect($loan->getEquityMonthsToPay())->toBe(0);
+});
+
+
+it('has computed equity monthly amortization', function () {
+    $borrower = (new Borrower)
+        ->setRegional(false)
+        ->setBirthdate(Carbon::now()->addYears(-40))
+        ->addWages(9000);
+    $property = (new Property)
+        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
+        ->setAppraisedValue(new Price(Money::of(800000, 'PHP')));
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(800000.0);
+    $loan = new Loan;
+    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
+    expect($loan->getEquityRequirementAmount()->inclusive()->compareTo(50000))->toBe(0);
+    expect($loan->getEquityMonthsToPay())->toBe(12);
+    expect($loan->getEquityMonthlyAmortizationAmount()->inclusive()->compareTo(BigDecimal::of(50000.0)->dividedBy(12, 2, RoundingMode::CEILING)))->toBe(0);
+});
+
+it('may add equity', function () {
     $borrower = (new Borrower)
         ->setRegional(false)
         ->setBirthdate(Carbon::now()->addYears(-40))
