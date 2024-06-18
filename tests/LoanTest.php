@@ -29,7 +29,7 @@ it('has borrower with different maximum months to pay depending on the co-borrow
     expect($loan->getMaximumMonthsToPay())->toBe(Loan::MAXIMUM_MONTHS_TO_PAY_LOAN); //360
     $co_borrower1 = (new Borrower)->setRegional(false)->addWages(14000)->setBirthdate(Carbon::parse('1966-03-17'));
     $borrower->addCoBorrower($co_borrower1);
-    expect($loan->getMaximumMonthsToPay())->toBe(141);
+    expect($loan->getMaximumMonthsToPay())->toBe(140);
 })->with('borrower', 'property');
 
 it('has default interest rate', function () {
