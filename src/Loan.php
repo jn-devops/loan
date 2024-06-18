@@ -2,14 +2,14 @@
 
 namespace Homeful\Loan;
 
-use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
+use Brick\Math\RoundingMode;
+use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
+use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
-use Brick\Math\RoundingMode;
 use Jarouche\Financial\PMT;
 use Whitecube\Price\Price;
-use Brick\Money\Money;
 
 class Loan
 {
@@ -37,9 +37,6 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Borrower
-     */
     public function getBorrower(): Borrower
     {
         return $this->borrower;
@@ -55,9 +52,6 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Property
-     */
     public function getProperty(): Property
     {
         return $this->property;
@@ -79,9 +73,6 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Price
-     */
     public function getLoanAmount(): Price
     {
         return $this->loan_amount ?? new Price(Money::of(0, 'PHP'));
@@ -113,9 +104,6 @@ class Loan
         return $this->equity ?? new Price(Money::of(0, 'PHP'));
     }
 
-    /**
-     * @return int
-     */
     public function getMaximumMonthsToPay(): int
     {
         $date_at_maximum_loan_maturity = $this->borrower->getOldestAmongst()->getBirthdate()->copy()
@@ -185,9 +173,6 @@ class Loan
         return new Price($equity);
     }
 
-    /**
-     * @return Price
-     */
     public function getJointDisposableMonthlyIncome(): Price
     {
         return $this->getBorrower()->getJointDisposableMonthlyIncome($this->getProperty());
@@ -217,7 +202,6 @@ class Loan
     }
 
     /**
-     * @return int
      * @throws \Brick\Math\Exception\MathException
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
@@ -232,7 +216,6 @@ class Loan
     }
 
     /**
-     * @return Price
      * @throws \Brick\Math\Exception\MathException
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
