@@ -2,6 +2,10 @@
 
 All notable changes to `loan` will be documented in this file.
 
+## #v1.3.3 - 2024-06-18
+
+fix getLoanAmount()
+
 ## #v1.3.0 - 2024-06-17
 
 add downpayment from equity
