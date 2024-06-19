@@ -8,10 +8,10 @@ use Brick\Math\Exception\RoundingNecessaryException;
 use Brick\Money\Exception\MoneyMismatchException;
 use Brick\Money\Exception\UnknownCurrencyException;
 use Homeful\Borrower\Data\BorrowerData;
+use Homeful\Equity\Data\EquityData;
 use Homeful\Loan\Loan;
 use Homeful\Property\Data\PropertyData;
 use Spatie\LaravelData\Data;
-use Homeful\Equity\Data\EquityData;
 
 class LoanData extends Data
 {
@@ -29,8 +29,7 @@ class LoanData extends Data
         public BorrowerData $borrower,
         public PropertyData $property,
         public EquityData $down_payment
-    ) {
-    }
+    ) {}
 
     /**
      * @throws MathException

@@ -5,12 +5,12 @@ namespace Homeful\Loan;
 use Brick\Math\RoundingMode;
 use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
+use Homeful\Equity\Equity;
 use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Jarouche\Financial\PMT;
 use Whitecube\Price\Price;
-use Homeful\Equity\Equity;
 
 class Loan
 {
@@ -40,9 +40,6 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Borrower
-     */
     public function getBorrower(): Borrower
     {
         return $this->borrower;
@@ -58,9 +55,6 @@ class Loan
         return $this;
     }
 
-    /**
-     * @return Property
-     */
     public function getProperty(): Property
     {
         return $this->property;
@@ -83,7 +77,6 @@ class Loan
     }
 
     /**
-     * @return Price
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
      * @throws \Brick\Money\Exception\UnknownCurrencyException
@@ -119,9 +112,6 @@ class Loan
         return $this->equity ?? new Price(Money::of(0, 'PHP'));
     }
 
-    /**
-     * @return int
-     */
     public function getMaximumMonthsToPay(): int
     {
         $date_at_maximum_loan_maturity = $this->borrower->getOldestAmongst()->getBirthdate()->copy()
@@ -186,15 +176,11 @@ class Loan
     {
         $equity = $this->property->getTotalContractPrice()->inclusive()
             ->minus($this->getLoanAmount()->inclusive())
-            ->minus($this->getEquity()->inclusive())
-        ;
+            ->minus($this->getEquity()->inclusive());
 
         return new Price($equity);
     }
 
-    /**
-     * @return Price
-     */
     public function getJointDisposableMonthlyIncome(): Price
     {
         return $this->getBorrower()->getJointDisposableMonthlyIncome($this->getProperty());
@@ -257,17 +243,14 @@ class Loan
             : $this->getEquityRequirementAmount()->dividedBy($this->getEquityMonthsToPay(), RoundingMode::CEILING);
     }
 
-    /**
-     * @return Equity|null
-     */
     public function getDownPayment(): ?Equity
     {
         return $this->down_payment;
     }
 
     /**
-     * @param Equity|float $down_payment
      * @return $this
+     *
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
      * @throws \Brick\Money\Exception\UnknownCurrencyException
@@ -278,6 +261,4 @@ class Loan
 
         return $this;
     }
-
-
 }

@@ -4,13 +4,13 @@ use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
+use Homeful\Equity\Equity;
 use Homeful\Loan\Data\LoanData;
 use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
 use Homeful\Loan\Loan;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Whitecube\Price\Price;
-use Homeful\Equity\Equity;
 
 dataset('borrower', function () {
     return [
@@ -159,8 +159,7 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
     expect($loanable_value)->toBe(807500.0);
     $loan->setBorrower($borrower)->setProperty($property)
-        ->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))->setDownPayment($amount = $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())
-    ;
+        ->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))->setDownPayment($amount = $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat());
     $data = LoanData::fromObject($loan);
     expect($data->loan_amount)->toBe($loan->getLoanAmount()->inclusive()->getAmount()->toFloat());
     expect($data->months_to_pay)->toBe($loan->getMaximumMonthsToPay());
@@ -184,7 +183,7 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     expect($data->down_payment->amount)->toBe($amount);
     expect($data->down_payment->interest_rate)->toBe(0.0);
     expect($data->down_payment->months_to_pay)->toBe(12);
-    expect($data->down_payment->monthly_amortization)->toBe($amount/12);
+    expect($data->down_payment->monthly_amortization)->toBe($amount / 12);
 })->with('borrower', 'property');
 
 it('has loan amount that should be less than the loanable amount', function (Borrower $borrower) {
@@ -243,8 +242,8 @@ it('may add equity', function () {
     $loan = new Loan;
     $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
     expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(50000.0);
-//    $loan->setEquity(new Price(Money::of(50000.0, 'PHP')));
-//    expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(0.0);
+    //    $loan->setEquity(new Price(Money::of(50000.0, 'PHP')));
+    //    expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(0.0);
 });
 
 it('can have income insufficiency', function () {
