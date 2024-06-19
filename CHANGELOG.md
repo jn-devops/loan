@@ -2,6 +2,10 @@
 
 All notable changes to `loan` will be documented in this file.
 
+## #v1.4.2 - 2024-06-19
+
+deprecate equity
+
 ## #v1.4.1 - 2024-06-19
 
 add nullable down_payment in loan data
