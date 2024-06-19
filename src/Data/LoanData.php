@@ -11,6 +11,7 @@ use Homeful\Borrower\Data\BorrowerData;
 use Homeful\Loan\Loan;
 use Homeful\Property\Data\PropertyData;
 use Spatie\LaravelData\Data;
+use Homeful\Equity\Data\EquityData;
 
 class LoanData extends Data
 {
@@ -27,6 +28,7 @@ class LoanData extends Data
         public float $equity_monthly_amortization,
         public BorrowerData $borrower,
         public PropertyData $property,
+        public EquityData $down_payment
     ) {
     }
 
@@ -51,7 +53,8 @@ class LoanData extends Data
             equity_months_to_pay: $loan->getEquityMonthsToPay(),
             equity_monthly_amortization: $loan->getEquityMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat(),
             borrower: BorrowerData::fromObject($loan->getBorrower()),
-            property: PropertyData::fromObject($loan->getProperty())
+            property: PropertyData::fromObject($loan->getProperty()),
+            down_payment: EquityData::fromObject($loan->getDownPayment())
         );
     }
 }

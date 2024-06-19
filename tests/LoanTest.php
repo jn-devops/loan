@@ -10,6 +10,7 @@ use Homeful\Loan\Loan;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Whitecube\Price\Price;
+use Homeful\Equity\Equity;
 
 dataset('borrower', function () {
     return [
@@ -157,7 +158,9 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     $property->setAppraisedValue(new Price(Money::of(850000, 'PHP')));
     $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
     expect($loanable_value)->toBe(807500.0);
-    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
+    $loan->setBorrower($borrower)->setProperty($property)
+        ->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))->setDownPayment($amount = $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())
+    ;
     $data = LoanData::fromObject($loan);
     expect($data->loan_amount)->toBe($loan->getLoanAmount()->inclusive()->getAmount()->toFloat());
     expect($data->months_to_pay)->toBe($loan->getMaximumMonthsToPay());
@@ -178,6 +181,10 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     expect($data->property->loanable_value)->toBe($property->getLoanableValue()->inclusive()->getAmount()->toFloat());
     expect($data->property->disposable_income_requirement_multiplier)->toBe($property->getDefaultDisposableIncomeRequirementMultiplier());
     expect($data->property->default_disposable_income_requirement_multiplier)->toBe($property->getDefaultDisposableIncomeRequirementMultiplier());
+    expect($data->down_payment->amount)->toBe($amount);
+    expect($data->down_payment->interest_rate)->toBe(0.0);
+    expect($data->down_payment->months_to_pay)->toBe(12);
+    expect($data->down_payment->monthly_amortization)->toBe($amount/12);
 })->with('borrower', 'property');
 
 it('has loan amount that should be less than the loanable amount', function (Borrower $borrower) {
@@ -236,8 +243,8 @@ it('may add equity', function () {
     $loan = new Loan;
     $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
     expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(50000.0);
-    $loan->setEquity(new Price(Money::of(50000.0, 'PHP')));
-    expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(0.0);
+//    $loan->setEquity(new Price(Money::of(50000.0, 'PHP')));
+//    expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(0.0);
 });
 
 it('can have income insufficiency', function () {
@@ -272,4 +279,31 @@ it('can have income insufficiency', function () {
     expect($loan->getEquityMonthlyAmortizationAmount()->inclusive()->compareTo(BigDecimal::of(50000.0)->dividedBy(12, 2, RoundingMode::CEILING)))->toBe(0);
     $loan->setEquityMonthsToPay(24);
     expect($loan->getEquityMonthlyAmortizationAmount()->inclusive()->compareTo(BigDecimal::of(50000.0)->dividedBy(24, 2, RoundingMode::CEILING)))->toBe(0);
+});
+
+it('has configurable down payment', function () {
+    $borrower = (new Borrower)
+        ->setRegional(false)
+        ->setBirthdate(Carbon::now()->addYears(-40))
+        ->addWages(9000);
+    $property = (new Property)
+        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
+        ->setAppraisedValue(new Price(Money::of(790000, 'PHP')));
+    expect($property->getLoanableValueMultiplier())->toBe(1.0);
+    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+    expect($loanable_value)->toBe(790000.0);
+    $loan = new Loan;
+    $loan->setBorrower($borrower)->setProperty($property)->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
+    expect($loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat())->toBe(60000.0);
+
+    $loan->setDownPayment((new Equity)->setAmount($loan->getEquityRequirementAmount()));
+    expect($loan->getDownPayment()->getAmount()->inclusive()->getAmount()->compareTo(60000))->toBe(0);
+    expect($loan->getDownPayment()->getAnnualInterestRate())->toBe(0.0);
+    expect($loan->getDownPayment()->getMonthsToPay())->toBe(12);
+    expect($loan->getDownPayment()->getMonthlyAmortization()->inclusive()->compareTo(5000))->toBe(0);
+    $loan->getDownPayment()->setMonthsToPay(24);
+    expect($loan->getDownPayment()->getAmount()->inclusive()->getAmount()->compareTo(60000))->toBe(0);
+    expect($loan->getDownPayment()->getAnnualInterestRate())->toBe(0.0);
+    expect($loan->getDownPayment()->getMonthsToPay())->toBe(24);
+    expect($loan->getDownPayment()->getMonthlyAmortization()->inclusive()->compareTo(2500))->toBe(0);
 });

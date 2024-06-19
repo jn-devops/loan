@@ -17,7 +17,7 @@ class LoanServiceProvider extends PackageServiceProvider
          */
         $package
             ->name('loan')
-            ->hasConfigFile(['loan', 'property'])
+            ->hasConfigFile(['loan', 'property', 'equity'])
             ->hasViews()
             ->hasMigration('create_loan_table')
             ->hasCommand(LoanCommand::class);
