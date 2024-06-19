@@ -159,8 +159,7 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
     expect($loanable_value)->toBe(807500.0);
     $loan->setBorrower($borrower)->setProperty($property)
-        ->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))
-    ;
+        ->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')));
     $data = LoanData::fromObject($loan);
     expect($data->loan_amount)->toBe($loan->getLoanAmount()->inclusive()->getAmount()->toFloat());
     expect($data->months_to_pay)->toBe($loan->getMaximumMonthsToPay());
