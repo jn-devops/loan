@@ -2,16 +2,16 @@
 
 namespace Homeful\Loan\Data;
 
-use Brick\Math\Exception\RoundingNecessaryException;
-use Brick\Money\Exception\UnknownCurrencyException;
-use Brick\Money\Exception\MoneyMismatchException;
-use Brick\Math\Exception\NumberFormatException;
 use Brick\Math\Exception\MathException;
+use Brick\Math\Exception\NumberFormatException;
+use Brick\Math\Exception\RoundingNecessaryException;
+use Brick\Money\Exception\MoneyMismatchException;
+use Brick\Money\Exception\UnknownCurrencyException;
 use Homeful\Borrower\Data\BorrowerData;
-use Homeful\Property\Data\PropertyData;
 use Homeful\Equity\Data\EquityData;
-use Spatie\LaravelData\Data;
 use Homeful\Loan\Loan;
+use Homeful\Property\Data\PropertyData;
+use Spatie\LaravelData\Data;
 
 class LoanData extends Data
 {
