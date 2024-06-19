@@ -245,7 +245,7 @@ class Loan
 
     public function getDownPayment(): ?Equity
     {
-        return $this->down_payment;
+        return isset($this->down_payment) ? $this->down_payment : null;
     }
 
     /**

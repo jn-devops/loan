@@ -159,7 +159,8 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
     expect($loanable_value)->toBe(807500.0);
     $loan->setBorrower($borrower)->setProperty($property)
-        ->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))->setDownPayment($amount = $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat());
+        ->setLoanAmount(new Price(Money::of($loanable_value, 'PHP')))
+    ;
     $data = LoanData::fromObject($loan);
     expect($data->loan_amount)->toBe($loan->getLoanAmount()->inclusive()->getAmount()->toFloat());
     expect($data->months_to_pay)->toBe($loan->getMaximumMonthsToPay());
@@ -180,6 +181,9 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     expect($data->property->loanable_value)->toBe($property->getLoanableValue()->inclusive()->getAmount()->toFloat());
     expect($data->property->disposable_income_requirement_multiplier)->toBe($property->getDefaultDisposableIncomeRequirementMultiplier());
     expect($data->property->default_disposable_income_requirement_multiplier)->toBe($property->getDefaultDisposableIncomeRequirementMultiplier());
+    $amount = $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat();
+    $loan->setDownPayment($amount);
+    $data = LoanData::fromObject($loan);
     expect($data->down_payment->amount)->toBe($amount);
     expect($data->down_payment->interest_rate)->toBe(0.0);
     expect($data->down_payment->months_to_pay)->toBe(12);
