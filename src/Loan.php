@@ -28,7 +28,18 @@ class Loan
 
     protected Price $equity;
 
+    /** @deprecated   */
     protected int $equity_months_to_pay = 12;
+
+    protected float $percent_miscellaneous_fees;
+
+    protected float $percent_down_payment;
+
+    protected Price $holding_fee;
+
+    protected Equity $balance_down_payment;
+
+    protected int $balance_down_payment_term;
 
     /**
      * @return $this
@@ -248,6 +259,8 @@ class Loan
     }
 
     /**
+     * @deprecated
+     *
      * @throws \Brick\Math\Exception\NumberFormatException
      * @throws \Brick\Math\Exception\RoundingNecessaryException
      * @throws \Brick\Money\Exception\UnknownCurrencyException
@@ -258,6 +271,8 @@ class Loan
     }
 
     /**
+     * @deprecated
+     *
      * @return $this
      *
      * @throws \Brick\Math\Exception\NumberFormatException
@@ -269,5 +284,89 @@ class Loan
         $this->down_payment = $down_payment instanceof Equity ? $down_payment : (new Equity)->setAmount($down_payment);
 
         return $this;
+    }
+
+    public function getTotalContractPrice(): Price
+    {
+        return $this->getProperty()->getTotalContractPrice();
+    }
+
+    public function setPercentMiscellaneousFees(float $value): self
+    {
+        $this->percent_miscellaneous_fees = $value;
+
+        return $this;
+    }
+
+    public function getPercentMiscellaneousFees(): float
+    {
+        return $this->percent_miscellaneous_fees ?? config('loan.percent_miscellaneous_fees');
+    }
+
+    public function getMiscellaneousFees(): Price
+    {
+        return new Price($this->getProperty()->getTotalContractPrice()->inclusive()
+            ->multipliedBy($this->getPercentMiscellaneousFees(), roundingMode: RoundingMode::CEILING)
+        );
+    }
+
+    public function getNetTotalContractPrice(): Price
+    {
+        return new Price($this->getProperty()->getTotalContractPrice()->inclusive()
+            ->plus($this->getMiscellaneousFees()->inclusive())
+        );
+    }
+
+    public function getPercentDownPayment(): float
+    {
+        return $this->percent_down_payment ?? config('loan.percent_down_payment');
+    }
+
+    public function setPercentDownPayment(float $value): self
+    {
+        $this->percent_down_payment = $value;
+
+        return $this;
+    }
+
+    public function getTotalContractPriceDownPayment(): Price
+    {
+        return new Price($this->getProperty()->getTotalContractPrice()->inclusive()->multipliedBy($this->getPercentDownPayment(), roundingMode: RoundingMode::CEILING));
+    }
+
+    public function getMiscellaneousFeesDownPayment(): Price
+    {
+        return new Price($this->getMiscellaneousFees()->inclusive()->multipliedBy($this->getPercentDownPayment(), roundingMode: RoundingMode::CEILING));
+    }
+
+    public function setHoldingFee(Price|float $value): self
+    {
+        $this->holding_fee = $value instanceof Price ? $value : new Price(Money::of($value, 'PHP'));
+
+        return $this;
+    }
+
+    public function getHoldingFee(): Price
+    {
+        return $this->holding_fee ?? new Price(Money::of(0, 'PHP'));
+    }
+
+    public function getBalanceDownPaymentTerm(): int
+    {
+        return $this->balance_down_payment_term ?? config('loan.down_payment_term');
+    }
+
+    public function setBalanceDownPaymentTerm(int $value): self
+    {
+        $this->balance_down_payment_term = $value;
+
+        return $this;
+    }
+
+    public function getBalanceDownPayment(): Equity
+    {
+        $balance_down_payment = new Price($this->getTotalContractPriceDownPayment()->inclusive()->minus($this->getHoldingFee()->inclusive()));
+
+        return (new Equity)->setAmount($balance_down_payment)->setMonthsToPay($this->getBalanceDownPaymentTerm());
     }
 }

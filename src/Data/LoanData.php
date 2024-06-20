@@ -23,8 +23,17 @@ class LoanData extends Data
         public float $monthly_amortization,
         public float $equity_requirement_amount,
         public bool $is_income_sufficient,
+        public float $total_contract_price,
+        public float $percent_miscellaneous_fees,
+        public float $miscellaneous_fees,
+        public float $net_total_contract_price,
+        public float $percent_down_payment,
+        public float $total_contract_price_down_payment,
+        public float $miscellaneous_fees_down_payment,
+        public float $holding_fee,
         public BorrowerData $borrower,
         public PropertyData $property,
+        public EquityData $balance_down_payment,
         public EquityData $down_payment
     ) {}
 
@@ -45,8 +54,17 @@ class LoanData extends Data
             monthly_amortization: $loan->getMonthlyAmortizationAmount()->inclusive()->getAmount()->toFloat(),
             equity_requirement_amount: $loan->getEquityRequirementAmount()->inclusive()->getAmount()->toFloat(),
             is_income_sufficient: $loan->getIsIncomeSufficient(),
+            total_contract_price: $loan->getTotalContractPrice()->inclusive()->getAmount()->toFloat(),
+            percent_miscellaneous_fees: $loan->getPercentMiscellaneousFees(),
+            miscellaneous_fees: $loan->getMiscellaneousFees()->inclusive()->getAmount()->toFloat(),
+            net_total_contract_price: $loan->getNetTotalContractPrice()->inclusive()->getAmount()->toFloat(),
+            percent_down_payment: $loan->getPercentDownPayment(),
+            total_contract_price_down_payment: $loan->getTotalContractPriceDownPayment()->inclusive()->getAmount()->toFloat(),
+            miscellaneous_fees_down_payment: $loan->getMiscellaneousFeesDownPayment()->inclusive()->getAmount()->toFloat(),
+            holding_fee: $loan->getHoldingFee()->inclusive()->getAmount()->toFloat(),
             borrower: BorrowerData::fromObject($loan->getBorrower()),
             property: PropertyData::fromObject($loan->getProperty()),
+            balance_down_payment: EquityData::fromObject($loan->getBalanceDownPayment()),
             down_payment: EquityData::fromObject($loan->getDownPayment()),
         );
     }
