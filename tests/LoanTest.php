@@ -314,19 +314,19 @@ it('has miscellaneous fees and net total contract price', function (Borrower $bo
     $loan = new Loan;
     $loan->setBorrower($borrower)->setProperty($property);
     expect($loan->getPercentMiscellaneousFees())->toBe(config('loan.percent_miscellaneous_fees'));
-    expect($loan->getPercentMiscellaneousFees())->toBe(8.5/100);
-    expect($loan->getNetTotalContractPrice()->inclusive()->compareTo($loan->getProperty()->getTotalContractPrice()->inclusive()->multipliedBy(1+(8.5/100), roundingMode: RoundingMode::CEILING)))->toBe(0);
+    expect($loan->getPercentMiscellaneousFees())->toBe(8.5 / 100);
+    expect($loan->getNetTotalContractPrice()->inclusive()->compareTo($loan->getProperty()->getTotalContractPrice()->inclusive()->multipliedBy(1 + (8.5 / 100), roundingMode: RoundingMode::CEILING)))->toBe(0);
     expect($loan->getMiscellaneousFees()->inclusive()->compareTo(72250.09))->toBe(0);
-    expect($loan->setPercentMiscellaneousFees(1/10)->getPercentMiscellaneousFees())->toBe(10/100);
+    expect($loan->setPercentMiscellaneousFees(1 / 10)->getPercentMiscellaneousFees())->toBe(10 / 100);
     expect($loan->getMiscellaneousFees()->inclusive()->compareTo(85000.1))->toBe(0);
-    expect($loan->getNetTotalContractPrice()->inclusive()->compareTo($loan->getProperty()->getTotalContractPrice()->inclusive()->multipliedBy(1+(10/100), roundingMode: RoundingMode::CEILING)))->toBe(0);
+    expect($loan->getNetTotalContractPrice()->inclusive()->compareTo($loan->getProperty()->getTotalContractPrice()->inclusive()->multipliedBy(1 + (10 / 100), roundingMode: RoundingMode::CEILING)))->toBe(0);
 })->with('borrower', 'property');
 
 it('has down payments', function (Borrower $borrower, Property $property) {
     $loan = new Loan;
     $loan->setBorrower($borrower)->setProperty($property);
     expect($loan->getPercentDownPayment())->toBe(config('loan.percent_down_payment'));
-    expect($loan->getPercentDownPayment())->toBe(5/100);
+    expect($loan->getPercentDownPayment())->toBe(5 / 100);
     expect($loan->getTotalContractPriceDownPayment()->inclusive()->compareTo($loan->getProperty()->getTotalContractPrice()->inclusive()->multipliedBy($loan->getPercentDownPayment(), roundingMode: RoundingMode::CEILING)))->toBe(0);
     expect($loan->getMiscellaneousFeesDownPayment()->inclusive()->compareTo($loan->getMiscellaneousFees()->inclusive()->multipliedBy($loan->getPercentDownPayment(), roundingMode: RoundingMode::CEILING)))->toBe(0);
 })->with('borrower', 'property');
