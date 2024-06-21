@@ -2,6 +2,10 @@
 
 All notable changes to `loan` will be documented in this file.
 
+## #v1.5.0 - 2024-06-21
+
+add miscellaneous fees, update down payment
+
 ## #v1.4.2 - 2024-06-19
 
 deprecate equity
