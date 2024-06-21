@@ -79,9 +79,9 @@ class Loan
      */
     public function setLoanAmount(Price $value): self
     {
-//        if ($value->compareTo($this->getProperty()->getLoanableValue()) > 0) {
-//            throw new LoanExceedsLoanableValueException;
-//        }
+        //        if ($value->compareTo($this->getProperty()->getLoanableValue()) > 0) {
+        //            throw new LoanExceedsLoanableValueException;
+        //        }
 
         if ($value->compareTo($this->getNetTotalContractPrice()) > 0) {
             throw new LoanExceedsNetTotalContractPriceException;
