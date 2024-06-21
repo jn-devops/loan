@@ -7,6 +7,7 @@ use Brick\Money\Money;
 use Homeful\Borrower\Borrower;
 use Homeful\Equity\Equity;
 use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
+use Homeful\Loan\Exceptions\LoanExceedsNetTotalContractPriceException;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
 use Jarouche\Financial\PMT;
@@ -74,12 +75,16 @@ class Loan
     /**
      * @return $this
      *
-     * @throws LoanExceedsLoanableValueException
+     * @throws LoanExceedsNetTotalContractPriceException
      */
     public function setLoanAmount(Price $value): self
     {
-        if ($value->compareTo($this->getProperty()->getLoanableValue()) > 0) {
-            throw new LoanExceedsLoanableValueException;
+//        if ($value->compareTo($this->getProperty()->getLoanableValue()) > 0) {
+//            throw new LoanExceedsLoanableValueException;
+//        }
+
+        if ($value->compareTo($this->getNetTotalContractPrice()) > 0) {
+            throw new LoanExceedsNetTotalContractPriceException;
         }
 
         $this->loan_amount = $value;

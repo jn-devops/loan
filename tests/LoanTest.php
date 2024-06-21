@@ -7,6 +7,7 @@ use Homeful\Borrower\Borrower;
 use Homeful\Equity\Equity;
 use Homeful\Loan\Data\LoanData;
 use Homeful\Loan\Exceptions\LoanExceedsLoanableValueException;
+use Homeful\Loan\Exceptions\LoanExceedsNetTotalContractPriceException;
 use Homeful\Loan\Loan;
 use Homeful\Property\Property;
 use Illuminate\Support\Carbon;
@@ -189,17 +190,17 @@ it('has loan data', function (Borrower $borrower, Property $property) {
     expect($data->down_payment->monthly_amortization)->toBe($amount / 12);
 })->with('borrower', 'property');
 
-it('has loan amount that should be less than the loanable amount', function (Borrower $borrower) {
-    $property = (new Property)
-        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
-        ->setAppraisedValue(new Price(Money::of(800000, 'PHP')));
-    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
-    expect($loanable_value)->toBe(800000.0);
-    $loan = new Loan;
-    $loan->setBorrower($borrower)->setProperty($property);
-    $loan->setLoanAmount(new Price(Money::of($loanable_value + 1, 'PHP')));
-
-})->with('borrower')->expectException(LoanExceedsLoanableValueException::class);
+//it('has loan amount that should be less than the loanable amount', function (Borrower $borrower) {
+//    $property = (new Property)
+//        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
+//        ->setAppraisedValue(new Price(Money::of(800000, 'PHP')));
+//    $loanable_value = $property->getLoanableValue()->inclusive()->getAmount()->toFloat();
+//    expect($loanable_value)->toBe(800000.0);
+//    $loan = new Loan;
+//    $loan->setBorrower($borrower)->setProperty($property);
+//    $loan->setLoanAmount(new Price(Money::of($loanable_value + 1, 'PHP')));
+//
+//})->with('borrower')->expectException(LoanExceedsLoanableValueException::class);
 
 it('has a default equity monthly amortization', function () {
     $loan = new Loan;
@@ -321,6 +322,16 @@ it('has miscellaneous fees and net total contract price', function (Borrower $bo
     expect($loan->getMiscellaneousFees()->inclusive()->compareTo(85000.1))->toBe(0);
     expect($loan->getNetTotalContractPrice()->inclusive()->compareTo($loan->getProperty()->getTotalContractPrice()->inclusive()->multipliedBy(1 + (10 / 100), roundingMode: RoundingMode::CEILING)))->toBe(0);
 })->with('borrower', 'property');
+
+it('has loan amount that should be less than the loanable amount', function (Borrower $borrower) {
+    $property = (new Property)
+        ->setTotalContractPrice(new Price(Money::of(850000, 'PHP')))
+        ->setAppraisedValue(new Price(Money::of(800000, 'PHP')));
+    $loan = new Loan;
+    $loan->setBorrower($borrower)->setProperty($property);
+    $loan->setLoanAmount($loan->getNetTotalContractPrice()->plus(1));
+
+})->with('borrower')->expectException(LoanExceedsNetTotalContractPriceException::class);
 
 it('has down payments', function (Borrower $borrower, Property $property) {
     $loan = new Loan;
