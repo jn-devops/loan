@@ -2,6 +2,10 @@
 
 All notable changes to `loan` will be documented in this file.
 
+## #v1.5.2 - 2024-06-29
+
+clean up composer.json, whitecube/price is already in jn-devops/common
+
 ## #v1.5.1 - 2024-06-21
 
 fix loan exceeds loanable value exception
